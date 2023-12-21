@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 
 #[derive(Debug)]
@@ -19,8 +20,8 @@ impl Pile {
 
 #[derive(Debug)]
 struct Card {
-    winning_numbers: Vec<u32>,
-    possible_numbers: Vec<u32>,
+    winning_numbers: HashSet<usize>,
+    possible_numbers: HashSet<usize>,
 }
 
 impl Card {
@@ -35,19 +36,19 @@ impl Card {
             .split_whitespace()
             .map(|num_str| {
                 num_str
-                    .parse::<u32>()
+                    .parse::<usize>()
                     .expect(format!("Failed to parse number for {}", num_str).as_str())
             })
-            .collect::<Vec<_>>();
+            .collect::<HashSet<_>>();
 
         let possible_numbers = possible_str
             .split_whitespace()
             .map(|num_str| {
                 num_str
-                    .parse::<u32>()
+                    .parse::<usize>()
                     .expect(format!("Failed to parse number for {}", num_str).as_str())
             })
-            .collect::<Vec<_>>();
+            .collect::<HashSet<_>>();
 
         Self {
             winning_numbers,
@@ -55,23 +56,19 @@ impl Card {
         }
     }
 
-    fn num_matches(&self) -> u32 {
+    fn num_matches(&self) -> usize {
         self.possible_numbers
-            .iter()
-            .filter(|num| self.winning_numbers.contains(num))
-            .count() as u32
+            .intersection(&self.winning_numbers)
+            .count()
     }
 }
 
-fn part_1() -> u32 {
-    let input = fs::read_to_string("input.txt").expect("failed to open input.txt");
-
-    let pile = Pile::from(input.as_str());
+fn part_1(pile: &Pile) -> usize {
     pile.cards
         .iter()
         .map(|card| {
             if card.num_matches() > 0 {
-                2u32.pow(card.num_matches() - 1)
+                2usize.pow((card.num_matches() - 1) as u32)
             } else {
                 0
             }
@@ -79,6 +76,30 @@ fn part_1() -> u32 {
         .sum()
 }
 
+fn part_2(pile: &Pile) -> usize {
+    let mut counts = vec![1usize; pile.cards.len()];
+    let len = counts.len() - 1;
+
+    for (i, card) in pile.cards.iter().enumerate() {
+        let j = if card.num_matches() > len {
+            len
+        } else {
+            card.num_matches() + i
+        };
+
+        for k in i + 1..j + 1 {
+            counts[k] += counts[i];
+        }
+    }
+
+    counts.iter().sum()
+}
+
 fn main() {
-    println!("Part 1: {}", part_1());
+    let input = fs::read_to_string("input.txt").expect("failed to open input.txt");
+
+    let pile = Pile::from(input.as_str());
+
+    println!("Part 1: {}", part_1(&pile));
+    println!("Part 2: {}", part_2(&pile));
 }
