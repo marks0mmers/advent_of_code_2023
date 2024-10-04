@@ -23,7 +23,7 @@ impl Race {
     }
 }
 
-fn read_races_part_1(input: &String) -> Vec<Race> {
+fn read_races_part_1(input: &str) -> Vec<Race> {
     let (times_str, distances_str) = input.split_once("\n").expect("Invalid File Format");
 
     let times = times_str
@@ -46,7 +46,7 @@ fn read_races_part_1(input: &String) -> Vec<Race> {
         .collect::<Vec<_>>()
 }
 
-fn read_race_part_2(input: &String) -> Race {
+fn read_race_part_2(input: &str) -> Race {
     let (time_str, distance_str) = input.split_once("\n").expect("Invalid File Format");
 
     let time = time_str
